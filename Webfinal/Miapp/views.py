@@ -2,6 +2,9 @@ from http.client import HTTPResponse
 from django.shortcuts import render, redirect
 from .models import Celulares, Insumos,Hardware,Software
 from .forms import UserRegisterForm,Formulario_Insumos, Formulario_celulares, Formulario_hardware, Formulario_software
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth import authenticate, login, logout
+
 
 # Create your views here.
 
@@ -144,7 +147,40 @@ def registro_usuario(request):
         formulario_registro_usuario = UserRegisterForm()
 	    
         return render(request, "formulario_registro_usuario.html", {"formulario_registro": formulario_registro_usuario})
-    
+
+def login_usuario (request):
+
+    if request.method == 'POST':
+
+        formulario_login_usuario = AuthenticationForm(request, data=request.POST)
+
+        if formulario_login_usuario.is_valid():
+
+            data = formulario_login_usuario.cleaned_data
+
+            nombre_usuario = data["username"]
+            password_usuario = data["password"]
+
+            user = authenticate(username=nombre_usuario, password=password_usuario)
+
+            if user:
+
+                login(request, user)
+
+                return render(request, "inicio2.html", {"mensaje": f'Bienvenido {nombre_usuario}'})
+            
+            else:
+
+                return render(request, "inicio2.html", {"mensaje": f'Error, datos incorrectos'})
+
+        return render(request, "inicio2.html", {"mensaje": f'Error, formulario invalido'})
+
+    else:
+
+        formulario_login_usuario = AuthenticationForm()
+
+        return render(request, "login.html", {"formulario_login": formulario_login_usuario})
+
 def eliminar_celular(request,id):
     
     if request.method == "POST":
